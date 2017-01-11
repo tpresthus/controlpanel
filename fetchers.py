@@ -1,11 +1,11 @@
-import pygtk
-pygtk.require("2.0")
-import gtk
-import gobject
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
+from gi.repository import GObject as gobject
 
 class FileContentFetcher(gobject.GObject):
     def __init__(self, filename, frequency, prefix="", suffix=""):
-        self.__gobject_init__()
+        gobject.GObject.__init__(self)
 
         self.filename = filename
         self.frequency = frequency
@@ -13,7 +13,7 @@ class FileContentFetcher(gobject.GObject):
         self.prefix = prefix
         self.suffix = suffix
 
-        gtk.timeout_add(frequency*1000, self.update)
+        gobject.timeout_add(frequency*1000, self.update)
 
     def update(self):
         try:

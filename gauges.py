@@ -1,6 +1,6 @@
-import pygtk
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
 
 class Gauges:
     def __init__(self):

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-import pygtk
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
 
 from gauges import *
 from buttons import *
@@ -45,7 +45,7 @@ class Base:
                 expand=False, fill=True, padding=0)
 
     def create_window(self):
-        self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.window = gtk.Window()
 
         self.window.connect("delete_event", self.delete_event)
         self.window.connect("destroy", self.destroy)

@@ -1,24 +1,18 @@
-import pygtk
-pygtk.require("2.0")
-import gtk
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk as gtk
 
 class ToggleButtonWidget:
     def __init__(self, label, action):
         self.action = action
-        self.button = gtk.ToggleButton(label)
+        self.button = gtk.Switch()
 
-        self.button.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#0f0'))
-        self.button.modify_bg(gtk.STATE_ACTIVE, gtk.gdk.Color('#0f0'))
-        self.button.modify_bg(gtk.STATE_PRELIGHT, gtk.gdk.Color('#0f0'))
-        self.button.modify_bg(gtk.STATE_SELECTED, gtk.gdk.Color('#0f0'))
-        self.button.modify_bg(gtk.STATE_INSENSITIVE, gtk.gdk.Color('#0f0'))
-
-        self.button.connect("toggled", self.on_toggled)
+        self.button.connect("notify::active", self.on_activated)
         self.button.show()
 
     def widget(self):
         return self.button
 
-    def on_toggled(self, data):
-        active = self.button.get_active()
-        print "TOGGLED:", active
+    def on_activated(self, switch, gparam):
+        active = switch.get_active()
+        print "ACTIVE:", active
