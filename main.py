@@ -22,10 +22,16 @@ class Base:
         self.window.show()
 
     def create_lightswitches(self):
-        switches = gtk.HButtonBox()
+        switches = gtk.HBox(homogeneous=True, spacing=5)
 
-        button = ToggleButtonWidget("Lys", None)
-        switches.pack_start(button.widget(), True, True, 0)
+        button = SwitchWidget("Lys", None)
+        switches.pack_start(button.widget(), False, False, 5)
+        
+        button = SwitchWidget("Nattmodus", None)
+        switches.pack_start(button.widget(), False, False, 5)
+        
+        button = SwitchWidget("Radio", None)
+        switches.pack_start(button.widget(), False, False, 5)
 
         switches.show()
         self.container.pack_start(switches,

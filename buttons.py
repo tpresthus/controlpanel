@@ -2,7 +2,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk as gtk
 
-class ToggleButtonWidget:
+class SwitchWidget:
     def __init__(self, label, action):
         self.action = action
         
