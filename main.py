@@ -8,6 +8,7 @@ from gi.repository import Gtk as gtk
 from gauges import *
 from buttons import *
 from fetchers import *
+from actions import SimpleScriptWithArgument
 
 def file_gauge(heading, filename, suffix):
     return LabelWidget(heading, "", from_file(filename, suffix)).widget()
@@ -24,7 +25,9 @@ class Base:
     def create_lightswitches(self):
         switches = gtk.HBox(homogeneous=True, spacing=5)
 
-        button = SwitchWidget("Lys", None)
+        action = SimpleScriptWithArgument("./regulator.sh", activate_args=["on"], deactivate_args=["off"])
+
+        button = SwitchWidget("Lys", action.action)
         switches.pack_start(button.widget(), False, False, 5)
         
         button = SwitchWidget("Nattmodus", None)
