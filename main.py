@@ -9,6 +9,7 @@ from gauges import *
 from buttons import *
 from fetchers import *
 from actions import SimpleScriptWithArgument
+from tempwidget import TempWidget
 
 def file_gauge(heading, filename, suffix):
     return LabelWidget(heading, "", from_file(filename, suffix)).widget()
@@ -17,6 +18,10 @@ class Base:
     def __init__(self):
         self.create_window()
         self.create_lightswitches()
+
+        temp = TempWidget("data/wanted_temp")
+        self.container.pack_start(temp.widget(), True, True, 5)
+
         self.create_gauges()
 
         self.container.show()
