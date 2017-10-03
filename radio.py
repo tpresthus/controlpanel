@@ -1,4 +1,5 @@
 import subprocess
+import collections
 import re
 
 import gi
@@ -14,9 +15,9 @@ class Radio:
         self.name = name
         self.url = url
 
+        self.player = MediaPlayer()
         self.create_ui()
 
-        self.player = MediaPlayer()
         self.player.run() # Can be deferred if we don't want to keep mplayer running
 
     def widget(self):
@@ -34,11 +35,10 @@ class Radio:
 
         self.container.pack_start(label, False, False, 0)
         
-        label = gtk.Label()
-        label.set_use_markup(True)
-        label.set_markup("<span weight='bold' font='12'>NOW PLAYING:</span> <span font='12'>%s</span>" % "Walk Idiot Walk - The Hives")
-
-        self.container.pack_start(label, False, False, 0)
+        self.now_playing_label = gtk.Label()
+        self.set_now_playing()
+        self.player.connect("title-changed", self.set_now_playing)
+        self.container.pack_start(self.now_playing_label, False, False, 0)
 
         controls = gtk.HBox(False, 0)
         self.container.pack_start(controls, False, False, 0)
@@ -63,10 +63,22 @@ class Radio:
 
     def play(self, ev=None):
         self.player.load_file(self.url)
+    
+    def set_now_playing(self, source=None, title=None):
+        if not title:
+            label = "<span></span>"
+        else:
+            label = "<span weight='bold' font='12'>NOW PLAYING:</span> <span font='12'>%s</span>" % title
 
-class MediaPlayer:
+        self.now_playing_label.set_use_markup(True)
+        self.now_playing_label.set_markup(label)
+
+class MediaPlayer(gobject.GObject):
     def __init__(self):
+        gobject.GObject.__init__(self)
         self.process = None
+        self.buffer = collections.deque()
+        self.buffer_line = ""
 
     def run(self):
         if self.is_alive():
@@ -81,6 +93,8 @@ class MediaPlayer:
                 stderr=subprocess.PIPE)
         
         self.process = p
+        gobject.io_add_watch(p.stdout, gobject.IO_IN, self.read_output)
+        gobject.timeout_add(500, self.parse_buffer)
 
     def quit(self):
         self.send_if_alive("quit 0")
@@ -132,12 +146,42 @@ class MediaPlayer:
             return
 
         datagram = command + "\n"
-        #self.process.communicate(input=datagram)
         self.process.stdin.write(datagram)
+
+    def read_output(self, source, condition):
+        if condition != gobject.IO_IN:
+            return True
+
+        char = self.process.stdout.read(1)
+        self.buffer.append(char)
+        
+        return True
+
+    def parse_buffer(self):
+        try:
+            while True:
+                self.buffer_line += self.buffer.popleft()
+        except: pass
+
+        if not '\n' in self.buffer_line:
+            return True
+
+        index = self.buffer_line.index('\n')
+        line = self.buffer_line[:index]
+        self.buffer_line = self.buffer_line[index+1:]
+        
+        self.parse_output(line)
+
+        return True
 
     def parse_output(self, line):
         if line.startswith('ICY Info:'):
             match = re.search(r"StreamTitle='(.*)';", line)
             title = match.group(1)
 
-            #TODO: signal title changed
+            self.emit("title-changed", title)
+
+gobject.type_register(MediaPlayer)
+gobject.signal_new("title-changed", MediaPlayer, gobject.SIGNAL_RUN_FIRST,
+        gobject.TYPE_NONE, (gobject.TYPE_STRING,))
+
