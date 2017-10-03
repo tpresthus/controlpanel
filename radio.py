@@ -50,10 +50,12 @@ class Radio:
         
         image = gtk.Image.new_from_icon_name("media-playback-pause", gtk.IconSize.LARGE_TOOLBAR)
         button = gtk.Button(image=image)
+        button.connect("clicked", self.pause)
         controls.pack_start(button, False, False, 5)
         
         image = gtk.Image.new_from_icon_name("media-playback-stop", gtk.IconSize.LARGE_TOOLBAR)
         button = gtk.Button(image=image)
+        button.connect("clicked", self.stop)
         controls.pack_start(button, False, False, 5)
         
         button = gtk.VolumeButton()
@@ -63,6 +65,12 @@ class Radio:
 
     def play(self, ev=None):
         self.player.load_file(self.url)
+
+    def pause(self, ev=None):
+        self.player.pause()
+
+    def stop(self, ev=None):
+        self.player.stop()
     
     def set_now_playing(self, source=None, title=None):
         if not title:
